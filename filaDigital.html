@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sicredi – Fila Digital, Agendamento e Gestão</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+tailwind.config={theme:{extend:{colors:{sic:{DEFAULT:'#35880F',dark:'#25690A',deep:'#0E3B22',lime:'#C5D82E',soft:'#F1F8EC',line:'#CFE6C0',brand:'#3FA110'}},fontFamily:{sans:['Nunito','Nunito Sans','Inter','system-ui','sans-serif']}}}}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+<style>
+:root{
+  --blue: #007bff; --indigo: #6610f2; --purple: #6f42c1; --pink: #e83e8c; --red: #dc3545;
+  --orange: #fd7e14; --yellow: #ffc107; --green: #28a745; --teal: #20c997; --cyan: #17a2b8;
+  --white: #fff; --gray: #6c757d; --gray-dark: #343a40; --primary: #007bff; --secondary: #6c757d;
+  --success: #28a745; --info: #17a2b8; --warning: #ffc107; --danger: #dc3545; --light: #f8f9fa;
+  --dark: #343a40; --bg:#F4F7F2; --surface:#fff; --text:#1f2937; --muted:#64748b; --line:#e2e8f0;
+  --soft:#F1F8EC; --link:#25690A; color-scheme:light dark; box-sizing:border-box;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{font-family:'Nunito','Nunito Sans',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+.fade{animation:f .3s ease both}@keyframes f{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.inp{width:100%;padding:.7rem 1rem;border:1.5px solid #9ca3af;border-radius:.75rem;font-size:.875rem;background:var(--surface);color:var(--text);transition:.15s}
+.inp:focus{outline:none;border-color:#3FA110;box-shadow:0 0 0 3px #3fa11030}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.5rem;border-radius:999px;font-weight:800;font-size:.875rem;transition:.15s}
+.btn-p{background:#35880F;color:#fff;box-shadow:0 4px 12px #35880f40}.btn-p:hover{background:#25690A}
+.btn-o{border:1.5px solid #3FA110;color:var(--link);background:var(--surface)}.btn-o:hover{background:var(--soft)}
+.slot{min-height:44px;padding:.65rem;border:1.5px solid var(--line);border-radius:.75rem;font-weight:700;font-size:.85rem;background:var(--surface);color:var(--text);transition:.15s}
+.slot:hover:not(:disabled){border-color:#3FA110;background:var(--soft)}
+.slot.on{border-color:#35880F;background:#35880F;color:#fff}
+.slot:disabled{background:var(--soft);color:var(--muted);opacity:.75;text-decoration:line-through;cursor:not-allowed}
+.pattern{background-image:radial-gradient(circle at 92% 0,#C5D82E40 0,transparent 40%)}
+button:focus-visible,select:focus-visible{outline:3px solid var(--link);outline-offset:2px}
+</style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+
+<!-- BARRA DE SISTEMA / NAVEGAÇÃO DE VISÕES -->
+<header class="bg-sic-deep text-white sticky top-0 z-50 shadow-lg">
+  <div class="max-w-7xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-3 text-xs">
+    <div class="flex items-center gap-2">
+      <span class="w-2.5 h-2.5 rounded-full bg-sic-lime animate-pulse"></span>
+      <span class="font-bold tracking-wide">Portal Integrado Sicredi</span>
+    </div>
+    <nav class="flex gap-1 bg-white/10 p-1 rounded-full font-bold" id="sys-nav">
+      <button data-tab="client" class="sys-tab px-3 py-1.5 rounded-full transition bg-white text-sic-deep shadow"><i class="fa-solid fa-calendar-check mr-1"></i>Portal & Agendamento</button>
+      <button data-tab="staff" class="sys-tab px-3 py-1.5 rounded-full transition text-white/90 hover:text-white"><i class="fa-solid fa-headset mr-1"></i>Colaborador <span id="queue-badge" class="ml-1 bg-sic-lime text-sic-deep text-[10px] px-1.5 py-0.2 rounded-full font-black">0</span></button>
+      <button data-tab="manager" class="sys-tab px-3 py-1.5 rounded-full transition text-white/90 hover:text-white"><i class="fa-solid fa-sliders mr-1"></i>Gerência</button>
+    </nav>
+  </div>
+</header>
+
+<!-- HEADER OFICIAL DO SITE (ESTILO DOS PRINTS) -->
+<div class="bg-white border-b border-slate-200 sticky top-[45px] z-40 shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-6">
+      <div class="flex items-center gap-2">
+        <div class="w-9 h-9 rounded-full bg-sic flex items-center justify-center text-white text-lg"><i class="fa-solid fa-seedling"></i></div>
+        <span class="text-2xl font-black tracking-tight text-slate-800 lowercase">sicredi</span>
+      </div>
+      <nav class="hidden md:flex items-center gap-6 text-sm font-bold text-slate-600">
+        <a href="#" class="text-sic border-b-2 border-sic pb-1">Para você</a>
+        <a href="#" class="hover:text-sic transition pb-1">Para empresas</a>
+        <a href="#" class="hover:text-sic transition pb-1">Para agronegócio</a>
+      </nav>
+    </div>
+    <div class="flex items-center gap-3">
+      <button class="bg-sic hover:bg-sic-dark text-white font-extrabold text-xs px-4 py-2 rounded-lg transition shadow-sm">Abrir conta</button>
+      <button class="text-slate-600 hover:text-sic p-2"><i class="fa-solid fa-magnifying-glass text-lg"></i></button>
+      <button class="text-slate-600 hover:text-sic p-2"><i class="fa-solid fa-bars text-lg"></i></button>
+    </div>
+  </div>
+</div>
+
+<main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8">
+
+<!-- CLIENTE / PORTAL (ESTILO HERO DO PRINT) -->
+<section id="view-client" class="fade space-y-8">
+  <!-- Hero Banner Verde -->
+  <div class="bg-sic pattern rounded-3xl p-8 sm:p-12 text-white shadow-xl relative overflow-hidden">
+    <div class="max-w-xl space-y-4">
+      <div class="inline-flex items-center gap-2 text-sic-lime font-bold text-xs uppercase tracking-wider bg-sic-deep/30 px-3 py-1 rounded-full">
+        <i class="fa-solid fa-handshake"></i> É ter com quem contar
+      </div>
+      <h1 class="text-3xl sm:text-5xl font-black leading-tight">A vida fica mais leve quando você tem com quem contar</h1>
+      <p class="text-white/90 text-sm sm:text-base">Seja pra organizar as contas, realizar planos ou cuidar do futuro, a gente está ao seu lado.</p>
+      <div class="pt-2">
+        <button onclick="document.getElementById('booking-card').scrollIntoView({behavior:'smooth'})" class="btn bg-white text-sic hover:bg-sic-soft font-extrabold px-6 py-3 rounded-full shadow-lg">
+          Agendar Atendimento <i class="fa-solid fa-arrow-down ml-1"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cards de Serviços (Estilo Print 2) -->
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:border-sic-line transition space-y-3">
+      <div class="w-12 h-12 rounded-xl bg-sic-soft text-sic flex items-center justify-center text-xl"><i class="fa-solid fa-piggy-bank"></i></div>
+      <h3 class="font-extrabold text-lg text-slate-800">Consórcios</h3>
+      <p class="text-xs text-slate-500 leading-relaxed">Faça uma simulação e planeje a conquista do que você mais deseja.</p>
+    </div>
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:border-sic-line transition space-y-3">
+      <div class="w-12 h-12 rounded-xl bg-sic-soft text-sic flex items-center justify-center text-xl"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+      <h3 class="font-extrabold text-lg text-slate-800">Empréstimos e financiamentos</h3>
+      <p class="text-xs text-slate-500 leading-relaxed">Conte com o apoio que você precisa pra tirar planos do papel.</p>
+    </div>
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:border-sic-line transition space-y-3">
+      <div class="w-12 h-12 rounded-xl bg-sic-soft text-sic flex items-center justify-center text-xl"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+      <h3 class="font-extrabold text-lg text-slate-800">Pagamentos</h3>
+      <p class="text-xs text-slate-500 leading-relaxed">Suas contas pagas com segurança e agilidade.</p>
+    </div>
+  </div>
+
+  <!-- Funnel de Agendamento -->
+  <div id="booking-card" class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden max-w-3xl mx-auto">
+    <div class="bg-sic-deep px-6 sm:px-8 py-6 text-white">
+      <h2 class="text-2xl font-black">Agende seu atendimento na agência</h2>
+      <p class="text-white text-xs mt-1">Escolha o horário e seja atendido sem filas.</p>
+    </div>
+    <div class="px-4 sm:px-8 py-4 bg-sic-soft border-b border-sic-line overflow-x-auto">
+      <div id="stepper" class="flex items-center justify-between min-w-[460px] text-xs"></div>
+    </div>
+
+    <form id="booking-form" class="p-6 sm:p-8" onsubmit="return false" novalidate>
+      <!-- Step 1 -->
+      <div data-step="1" class="space-y-5">
+        <div><h3 class="font-extrabold text-lg">Onde você quer ser atendido?</h3><p class="text-sm text-slate-500">Escolha a cidade e a agência.</p></div>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div><label class="block text-sm font-semibold mb-1">Cidade *</label><select id="input-city" required class="inp"><option value="">Selecione…</option></select></div>
+          <div><label class="block text-sm font-semibold mb-1">Agência *</label><select id="input-agency" required class="inp"><option value="">Escolha a cidade primeiro…</option></select></div>
+        </div>
+        <div class="flex justify-end"><button type="button" class="btn btn-p" onclick="go(2)">Continuar <i class="fa-solid fa-arrow-right"></i></button></div>
+      </div>
+      <!-- Step 2 -->
+      <div data-step="2" class="space-y-5 hidden">
+        <div><h3 class="font-extrabold text-lg">Quem será atendido?</h3><p class="text-sm text-slate-500">Pessoa física ou jurídica.</p></div>
+        <div class="grid sm:grid-cols-2 gap-3" id="profile-switch"></div>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div><label id="label-name" class="block text-sm font-semibold mb-1">Nome completo *</label><input id="client-name" required class="inp" placeholder="Ex: Maria das Dores"></div>
+          <div><label id="label-doc" class="block text-sm font-semibold mb-1">CPF *</label><input id="client-doc" required inputmode="numeric" class="inp" placeholder="000.000.000-00"></div>
+          <div><label class="block text-sm font-semibold mb-1">E-mail *</label><input id="client-email" type="email" required class="inp" placeholder="seu.email@exemplo.com"></div>
+          <div><label class="block text-sm font-semibold mb-1">WhatsApp / Celular *</label><input id="client-phone" required inputmode="tel" class="inp" placeholder="(48) 99999-8888"></div>
+        </div>
+        <div class="flex justify-between"><button type="button" class="btn btn-o" onclick="go(1)"><i class="fa-solid fa-arrow-left"></i> Voltar</button><button type="button" class="btn btn-p" onclick="go(3)">Continuar <i class="fa-solid fa-arrow-right"></i></button></div>
+      </div>
+      <!-- Step 3 -->
+      <div data-step="3" class="space-y-5 hidden">
+        <div><h3 class="font-extrabold text-lg">Como podemos ajudar?</h3><p class="text-sm text-slate-500">Escolha o assunto do atendimento.</p></div>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div><label class="block text-sm font-semibold mb-1">Categoria *</label><select id="problem-category" required class="inp"><option value="">Selecione…</option></select></div>
+          <div><label class="block text-sm font-semibold mb-1">Motivo específico *</label><select id="problem-specific" required class="inp"><option value="">Escolha a categoria primeiro…</option></select></div>
+        </div>
+        <div id="duration-box" class="hidden bg-sic-soft border border-sic-line rounded-2xl p-4 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-sic text-white flex items-center justify-center"><i class="fa-solid fa-clock"></i></div>
+          <div><span class="text-xs text-slate-500 block">Tempo estimado</span><b id="estimated-time-label" class="text-sic-dark"></b></div>
+        </div>
+        <div><label class="block text-sm font-semibold mb-1">Detalhes do caso *</label><textarea id="problem-report" rows="3" required minlength="5" class="inp" placeholder="Explique brevemente o motivo…"></textarea></div>
+        <div class="flex justify-between"><button type="button" class="btn btn-o" onclick="go(2)"><i class="fa-solid fa-arrow-left"></i> Voltar</button><button type="button" class="btn btn-p" onclick="go(4)">Escolher horário <i class="fa-solid fa-arrow-right"></i></button></div>
+      </div>
+      <!-- Step 4 -->
+      <div data-step="4" class="space-y-5 hidden">
+        <div><h3 class="font-extrabold text-lg">Escolha dia e horário</h3><p class="text-sm text-slate-500">Duração estimada: <b id="slot-duration-text" class="text-sic-dark">--</b></p></div>
+        <div><label class="block text-sm font-semibold mb-1">Data *</label><input type="date" id="ticket-date" class="inp sm:w-1/2"></div>
+        <div><label class="block text-sm font-semibold mb-2">Horários disponíveis *</label><div id="slots-container" class="grid grid-cols-3 sm:grid-cols-4 gap-3"></div></div>
+        <div class="flex justify-between"><button type="button" class="btn btn-o" onclick="go(3)"><i class="fa-solid fa-arrow-left"></i> Voltar</button><button type="button" class="btn btn-p" onclick="go(5)">Confirmar agendamento <i class="fa-solid fa-check"></i></button></div>
+      </div>
+    </form>
+
+    <!-- Step 5 (Confirmação) -->
+    <div id="step-5" class="hidden p-8 text-center fade">
+      <div class="w-20 h-20 bg-sic-soft text-sic rounded-full flex items-center justify-center text-5xl mx-auto mb-4"><i class="fa-solid fa-circle-check"></i></div>
+      <h3 class="text-2xl font-black mb-1">Agendamento Confirmado!</h3>
+      <p class="text-sm text-slate-600 mb-6">Apresente este código na chegada à agência.</p>
+      <div class="bg-sic-soft border-2 border-dashed border-sic-line rounded-3xl p-6 max-w-md mx-auto text-left space-y-4 mb-6">
+        <div class="flex justify-between items-center border-b border-sic-line pb-3">
+          <div><span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Senha</span><b id="res-ticket-code" class="text-3xl text-sic"></b></div>
+          <span id="res-ticket-type" class="bg-sic text-white text-xs font-extrabold px-3 py-1 rounded-full"></span>
+        </div>
+        <dl id="res-grid" class="grid grid-cols-2 gap-3 text-xs"></dl>
+      </div>
+      <div class="flex justify-center gap-2 flex-wrap">
+        <button class="btn btn-o" onclick="window.print()"><i class="fa-solid fa-print"></i> Imprimir</button>
+        <button class="btn btn-p" onclick="resetFunnel()"><i class="fa-solid fa-plus"></i> Novo Agendamento</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COLABORADOR -->
+<section id="view-staff" class="hidden fade space-y-6">
+  <div id="stats" class="grid grid-cols-2 lg:grid-cols-4 gap-4"></div>
+  <div class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+    <div class="px-6 py-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between sm:items-center gap-3 bg-sic-soft">
+      <div><h3 class="font-extrabold text-lg">Fila de Atendimentos</h3><p class="text-xs text-slate-500">Demanda agendada pelos associados.</p></div>
+      <input id="staff-search" placeholder="Buscar nome, CPF ou senha…" class="inp sm:w-72">
+    </div>
+    <div class="overflow-x-auto"><table class="w-full text-left text-sm">
+      <thead><tr class="bg-slate-50 text-[11px] font-extrabold text-slate-500 uppercase tracking-wider"><th class="py-3 px-5">Senha</th><th class="py-3 px-5">Associado</th><th class="py-3 px-5">Horário</th><th class="py-3 px-5">Demanda</th><th class="py-3 px-5">Status</th><th class="py-3 px-5 text-right">Ação</th></tr></thead>
+      <tbody id="queue-tbody" class="divide-y divide-slate-100"></tbody></table></div>
+  </div>
+</section>
+
+<!-- GERÊNCIA -->
+<section id="view-manager" class="hidden fade space-y-6">
+  <div class="bg-sic pattern p-6 rounded-3xl text-white shadow-lg flex flex-wrap justify-between items-center gap-4">
+    <div><h2 class="text-2xl font-black"><i class="fa-solid fa-sliders mr-2"></i>Painel da Gerência</h2><p class="text-white text-sm mt-1">Gerencie equipe, colaboradores, status e demandas por agência.</p></div>
+    <span class="bg-sic-deep/60 px-4 py-2 rounded-full text-xs font-bold"><i class="fa-solid fa-building-user text-sic-lime mr-1"></i>Agência Centro Histórico</span>
+  </div>
+
+  <div class="grid lg:grid-cols-2 gap-6">
+    <!-- Bloco 1: Gestão de Equipe / Colaboradores -->
+    <div class="bg-white rounded-3xl shadow-xl border border-slate-200 p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 class="font-extrabold text-lg"><i class="fa-solid fa-users-gear mr-2 text-sic"></i>Equipe & Colaboradores</h3>
+        <span id="team-count-badge" class="text-xs font-bold bg-sic-soft text-sic-dark px-3 py-1 rounded-full">0 ativos</span>
+      </div>
+
+      <!-- Formulário Adicionar Colaborador -->
+      <form id="add-staff-form" class="bg-sic-soft/60 p-4 rounded-2xl border border-sic-line space-y-3">
+        <h4 class="text-xs font-black uppercase tracking-wider text-sic-dark">Adicionar Novo Colaborador</h4>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div><label class="block text-xs font-semibold mb-1">Nome *</label><input id="new-staff-name" required class="inp !py-1.5 !text-xs" placeholder="Ex: Ana Souza"></div>
+          <div><label class="block text-xs font-semibold mb-1">Perfil *</label><select id="new-staff-profile" class="inp !py-1.5 !text-xs"><option value="PF">Pessoa Física (PF)</option><option value="PJ">Pessoa Jurídica (PJ)</option></select></div>
+        </div>
+        <button type="submit" class="btn btn-p !py-2 !text-xs w-full justify-center"><i class="fa-solid fa-user-plus"></i> Cadastrar Colaborador</button>
+      </form>
+
+      <!-- Tabela de Equipe -->
+      <div class="overflow-x-auto max-h-72 overflow-y-auto">
+        <table class="w-full text-left text-xs">
+          <thead><tr class="bg-slate-50 font-extrabold text-slate-500 uppercase"><th class="py-2.5 px-3">Nome</th><th class="py-2.5 px-3">Perfil</th><th class="py-2.5 px-3">Status</th><th class="py-2.5 px-3 text-right">Ações</th></tr></thead>
+          <tbody id="manager-team-tbody" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Bloco 2: Gestão de Demandas / Problemas e Tempos -->
+    <div class="bg-white rounded-3xl shadow-xl border border-slate-200 p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 class="font-extrabold text-lg"><i class="fa-solid fa-clock-rotate-left mr-2 text-sic"></i>Demandas & Tempos</h3>
+        <span class="text-xs font-bold bg-sic-soft text-sic-dark px-3 py-1 rounded-full">Configurar Tempos</span>
+      </div>
+
+      <!-- Formulário Adicionar Demanda -->
+      <form id="add-problem-form" class="bg-sic-soft/60 p-4 rounded-2xl border border-sic-line space-y-3">
+        <h4 class="text-xs font-black uppercase tracking-wider text-sic-dark">Adicionar Nova Demanda</h4>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div><label class="block text-xs font-semibold mb-1">Categoria *</label><select id="new-prob-cat" class="inp !py-1.5 !text-xs"></select></div>
+          <div><label class="block text-xs font-semibold mb-1">Nome do Serviço *</label><input id="new-prob-name" required class="inp !py-1.5 !text-xs" placeholder="Ex: Análise Especial"></div>
+        </div>
+        <div><label class="block text-xs font-semibold mb-1">Tempo Estimado (minutos) *</label><input type="number" id="new-prob-time" min="5" max="120" value="20" required class="inp !py-1.5 !text-xs"></div>
+        <button type="submit" class="btn btn-p !py-2 !text-xs w-full justify-center"><i class="fa-solid fa-plus-circle"></i> Adicionar Serviço</button>
+      </form>
+
+      <!-- Lista de Demandas -->
+      <div class="overflow-x-auto max-h-72 overflow-y-auto">
+        <table class="w-full text-left text-xs">
+          <thead><tr class="bg-slate-50 font-extrabold text-slate-500 uppercase"><th class="py-2.5 px-3">Categoria / Serviço</th><th class="py-2.5 px-3">Tempo</th><th class="py-2.5 px-3 text-right">Ações</th></tr></thead>
+          <tbody id="manager-probs-tbody" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- WIDGETS FLUTUANTES (ESTILO DO PRINT 1 E 2) -->
+<div class="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
+  <button aria-label="WhatsApp" onclick="toast('Abrindo atendimento via WhatsApp...')" class="w-14 h-14 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-2xl flex items-center justify-center text-3xl transition transform hover:scale-105">
+    <i class="fa-brands fa-whatsapp"></i>
+  </button>
+</div>
+<div class="fixed right-0 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-1">
+  <button aria-label="Acessibilidade" onclick="toast('Modo de Acessibilidade ativado')" class="bg-blue-900 text-white p-3 rounded-l-xl shadow-lg hover:bg-blue-800 transition"><i class="fa-solid fa-universal-access text-lg"></i></button>
+  <button aria-label="Libras" onclick="toast('Intérprete de Libras ativado')" class="bg-blue-900 text-white p-3 rounded-l-xl shadow-lg hover:bg-blue-800 transition"><i class="fa-solid fa-hands-asl-interpreting text-lg"></i></button>
+</div>
+
+<!-- MODAL RELATÓRIO DO ATENDIMENTO -->
+<div id="report-modal" class="fixed inset-0 bg-sic-deep/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden fade">
+    <div class="bg-sic px-6 py-4 text-white flex justify-between items-center"><h3 id="m-title" class="font-extrabold"></h3><button onclick="closeModal('report-modal')" class="text-xl p-2 -m-2"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="p-6 overflow-y-auto space-y-4 text-sm">
+      <dl id="m-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-sic-soft p-4 rounded-2xl border border-sic-line"></dl>
+      <div><span class="text-xs font-extrabold text-slate-400 uppercase block mb-1">Assunto</span><p id="m-cat" class="font-bold bg-slate-100 p-3 rounded-xl"></p></div>
+      <div><span class="text-xs font-extrabold text-slate-400 uppercase block mb-1">Relatório</span><div id="m-desc" class="bg-slate-50 p-4 rounded-xl border border-slate-200 whitespace-pre-wrap text-xs leading-relaxed"></div></div>
+    </div>
+    <div class="px-6 py-4 bg-slate-50 border-t flex justify-between items-center">
+      <span id="m-badge" class="px-3 py-1 rounded-full text-xs font-bold"></span>
+      <div class="flex gap-2">
+        <button class="btn !py-2 !text-xs bg-amber-500 text-white" onclick="setStatus('Em Atendimento')"><i class="fa-solid fa-play"></i> Iniciar</button>
+        <button class="btn btn-p !py-2 !text-xs" onclick="setStatus('Concluído')"><i class="fa-solid fa-check"></i> Concluir</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="fixed bottom-5 left-5 bg-sic-deep text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-3 transition-all duration-300 -translate-y-24 opacity-0 z-50"><i id="toast-i"></i><span id="toast-m" class="text-sm font-semibold"></span></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtDate=d=>d.split('-').reverse().join('/');
+const todayISO=()=>{const d=new Date();return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+
+const agencyData={"Porto Alegre":["Agência Centro Histórico - Av. Borges","Agência Moinhos de Vento"],"Nova Trento":["Agência Nova Trento Centro - Av. Santo Inácio"],"Caxias do Sul":["Agência Caxias Centro"],"Florianópolis":["Agência Centro - Florianópolis"]};
+
+let problemData={
+"Contas e Abertura":[["Abertura de Conta e Contratação Inicial",45],["Atualização Cadastral",30]],
+"Canais Digitais":[["Liberação de Dispositivo / App",15],["Verificação de Segurança",15]],
+"Crédito":[["Empréstimo ou Financiamento",35],["Renegociação",30]],
+"Seguros e Investimentos":[["Investimentos e Poupança",25]]
+};
+
+let teamList=[
+{name:'Roberto Mendes',profile:'PJ',status:'Em Atendimento'},
+{name:'Juliana Silva',profile:'PF',status:'Livre'},
+{name:'Fernando Alves',profile:'PF',status:'Em Pausa'}
+];
+
+const cfg={open:'09:00',close:'16:00',pf:4,pj:2};
+let profile='fisica',duration=15,selTime='',activeId=null,step=1;
+
+let queue=[
+{id:'#SIC-4089',type:'fisica',name:'Marcos Vinícius',doc:'012.345.678-90',agency:'Agência Centro Histórico - Av. Borges',category:'Contas e Abertura',problem:'Abertura de Conta e Contratação Inicial',duration:45,report:'Desejo abrir conta pessoa física e simular cartão.',date:todayISO(),time:'10:00',status:'Em Atendimento'},
+{id:'#SIC-4090',type:'fisica',name:'Sandra Maria',doc:'321.654.987-10',agency:'Agência Centro Histórico - Av. Borges',category:'Canais Digitais',problem:'Liberação de Dispositivo / App',duration:15,report:'Troquei de celular e preciso liberar o app.',date:todayISO(),time:'11:00',status:'Aguardando'}
+];
+
+/* Sistema de Abas Superiores */
+function switchSysTab(t){
+  ['client','staff','manager'].forEach(v=>$('view-'+v).classList.toggle('hidden',v!==t));
+  document.querySelectorAll('.sys-tab').forEach(b=>{
+    const on=b.dataset.tab===t;
+    b.className='sys-tab px-3 py-1.5 rounded-full transition '+(on?'bg-white text-sic-deep shadow font-bold':'text-white/90 hover:text-white font-bold');
+  });
+  if(t==='staff')renderQueue();
+  if(t==='manager')renderManager();
+}
+document.querySelectorAll('.sys-tab').forEach(b=>b.onclick=()=>switchSysTab(b.dataset.tab));
+
+/* Selects */
+function initSelects(){
+  const cSel=$('input-city');cSel.innerHTML='<option value="">Selecione…</option>';
+  Object.keys(agencyData).forEach(c=>cSel.add(new Option(c,c)));
+
+  const pCat=$('problem-category');pCat.innerHTML='<option value="">Selecione…</option>';
+  Object.keys(problemData).forEach(c=>pCat.add(new Option(c,c)));
+
+  const nCat=$('new-prob-cat');nCat.innerHTML='';
+  Object.keys(problemData).forEach(c=>nCat.add(new Option(c,c)));
+}
+$('input-city').onchange=e=>{const s=$('input-agency');s.length=1;s.options[0].text='Selecione a agência…';(agencyData[e.target.value]||[]).forEach(a=>s.add(new Option(a,a)))};
+$('problem-category').onchange=e=>{
+  const s=$('problem-specific');s.length=1;s.options[0].text='Selecione o motivo…';$('duration-box').classList.add('hidden');
+  (problemData[e.target.value]||[]).forEach(([t,m])=>{const o=new Option(`${t} (~${m} min)`,t);o.dataset.m=m;s.add(o)});
+};
+$('problem-specific').onchange=e=>{
+  const o=e.target.selectedOptions[0];
+  if(o&&o.dataset.m){duration=+o.dataset.m;$('estimated-time-label').textContent=duration+' minutos';$('duration-box').classList.remove('hidden')}
+  else $('duration-box').classList.add('hidden');
+};
+
+/* Perfil PF/PJ */
+function renderProfile(){
+  const opts=[['fisica','fa-user','Pessoa Física','Atendimento CPF'],['juridica','fa-building','Pessoa Jurídica','Empresa CNPJ']];
+  $('profile-switch').innerHTML=opts.map(([v,i,t,d])=>`<button type="button" data-p="${v}" class="flex items-center gap-3 p-4 rounded-2xl border-2 text-left transition ${profile===v?'border-sic bg-sic-soft':'border-slate-200 bg-white hover:border-sic-line'}"><span class="w-10 h-10 rounded-full flex items-center justify-center ${profile===v?'bg-sic text-white':'bg-slate-100 text-slate-500'}"><i class="fa-solid ${i}"></i></span><span><b class="block text-sm">${t}</b><span class="text-xs text-slate-500">${d}</span></span></button>`).join('');
+  document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{profile=b.dataset.p;renderProfile()});
+  const pj=profile==='juridica';
+  $('label-name').textContent=pj?'Razão social *':'Nome completo *';
+  $('label-doc').textContent=pj?'CNPJ *':'CPF *';
+}
+renderProfile();
+
+/* Horários */
+const toMin=t=>{const[h,m]=t.split(':').map(Number);return h*60+m};
+const toHM=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+function renderSlots(){
+  const box=$('slots-container');selTime='';box.innerHTML='';
+  const date=$('ticket-date').value;if(!date)return;
+  const agency=$('input-agency').value,cap=profile==='fisica'?cfg.pf:cfg.pj;
+  const step=Math.max(15,Math.ceil(duration/15)*15),open=toMin(cfg.open),close=toMin(cfg.close);
+  let n=0;
+  for(let t=open;t+duration<=close;t+=step){
+    if(t>=720&&t<780)continue;
+    const taken=queue.filter(q=>q.date===date&&q.agency===agency&&q.type===profile&&q.status!=='Concluído'&&toMin(q.time)<t+step&&toMin(q.time)+q.duration>t).length;
+    const b=document.createElement('button');b.type='button';b.className='slot';b.disabled=taken>=cap;b.textContent=toHM(t);
+    b.onclick=()=>{box.querySelectorAll('.slot').forEach(x=>x.classList.remove('on'));b.classList.add('on');selTime=toHM(t)};
+    box.appendChild(b);n++;
+  }
+  if(!n)box.innerHTML='<p class="col-span-full text-sm text-slate-500">Sem horários disponíveis.</p>';
+}
+$('ticket-date').onchange=renderSlots;
+
+/* Funil */
+function stepper(){
+  const stepNames=['','Local','Dados','Problema','Horário','Senha'];
+  $('stepper').innerHTML=[1,2,3,4,5].map(i=>{
+    const done=i<step,cur=i===step;
+    return `<div class="flex items-center gap-1.5 font-bold ${cur||done?'text-sic-dark':'text-slate-400'}"><span class="w-7 h-7 rounded-full flex items-center justify-center ${done?'bg-sic text-white':cur?'bg-sic text-white ring-4 ring-sic/20':'bg-slate-200 text-slate-600'}">${done?'<i class="fa-solid fa-check"></i>':i}</span>${stepNames[i]}</div>${i<5?'<div class="flex-1 h-0.5 mx-2 '+(done?'bg-sic':'bg-slate-300')+'"></div>':''}`
+  }).join('');
+}
+function show(n){
+  step=n;
+  document.querySelectorAll('[data-step]').forEach(d=>d.classList.toggle('hidden',+d.dataset.step!==n));
+  $('booking-form').classList.toggle('hidden',n===5);$('step-5').classList.toggle('hidden',n!==5);
+  stepper();window.scrollTo({top:0,behavior:'smooth'});
+}
+function go(n){
+  if(n<step){show(n);return}
+  const f=document.querySelector(`[data-step="${step}"]`).querySelectorAll('[required]');
+  for(const el of f){if(!el.checkValidity()){el.reportValidity();return;}}
+  if(n===4){$('slot-duration-text').textContent=duration+' min';const d=$('ticket-date');d.min=todayISO();if(!d.value)d.value=todayISO();renderSlots()}
+  if(n===5){if(!selTime){toast('Selecione um horário!',0);return}confirmBooking();return}
+  show(n);
+}
+function confirmBooking(){
+  let id='#SIC-'+(1000+Math.floor(Math.random()*9000));
+  const t={id,type:profile,name:$('client-name').value,doc:$('client-doc').value,agency:$('input-agency').value,category:$('problem-category').value,problem:$('problem-specific').value,duration,report:$('problem-report').value,date:$('ticket-date').value,time:selTime,status:'Aguardando'};
+  queue.unshift(t);
+  $('res-ticket-code').textContent=id;$('res-ticket-type').textContent=profile==='fisica'?'PF':'PJ';
+  const row=(l,v,c='')=>`<div class="${c}"><dt class="text-slate-400 font-semibold">${l}</dt><dd class="font-extrabold text-slate-800">${esc(v)}</dd></div>`;
+  $('res-grid').innerHTML=row('Associado',t.name)+row('CPF / CNPJ',t.doc)+row('Agência',t.agency,'col-span-2')+row('Data e horário',`${fmtDate(t.date)} às ${t.time}`)+row('Tempo',t.duration+' min')+row('Assunto',t.problem,'col-span-2');
+  show(5);toast('Agendamento confirmado!');stats();
+}
+function resetFunnel(){$('booking-form').reset();profile='fisica';duration=15;selTime='';$('duration-box').classList.add('hidden');renderProfile();show(1)}
+
+/* Colaborador & Stats */
+const badge=s=>({'Aguardando':'bg-amber-50 text-amber-700 border-amber-200','Em Atendimento':'bg-blue-50 text-blue-700 border-blue-200','Concluído':'bg-sic-soft text-sic-dark border-sic-line'}[s]);
+function stats(){
+  const c=s=>queue.filter(t=>t.status===s).length;
+  $('stats').innerHTML=`
+    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 flex items-center justify-between"><div><p class="text-[11px] font-extrabold text-slate-400 uppercase">Fila hoje</p><h4 class="text-3xl font-black mt-0.5">${queue.length}</h4></div><div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl text-sic bg-sic-soft"><i class="fa-solid fa-users"></i></div></div>
+    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 flex items-center justify-between"><div><p class="text-[11px] font-extrabold text-slate-400 uppercase">Em atendimento</p><h4 class="text-3xl font-black mt-0.5">${c('Em Atendimento')}</h4></div><div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl text-amber-600 bg-amber-50"><i class="fa-solid fa-spinner fa-spin"></i></div></div>
+    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 flex items-center justify-between"><div><p class="text-[11px] font-extrabold text-slate-400 uppercase">Concluídos</p><h4 class="text-3xl font-black mt-0.5">${c('Concluído')}</h4></div><div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl text-sic bg-sic-soft"><i class="fa-solid fa-circle-check"></i></div></div>
+    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 flex items-center justify-between"><div><p class="text-[11px] font-extrabold text-slate-400 uppercase">Equipe Ativa</p><h4 class="text-3xl font-black mt-0.5">${teamList.length}</h4></div><div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl text-blue-600 bg-blue-50"><i class="fa-solid fa-user-tie"></i></div></div>
+  `;
+  $('queue-badge').textContent=c('Aguardando');
+}
+function renderQueue(){
+  const q=$('staff-search').value.toLowerCase();
+  const list=queue.filter(t=>[t.name,t.id,t.doc,t.agency].some(x=>x.toLowerCase().includes(q)));
+  $('queue-tbody').innerHTML=list.length?list.map(t=>`<tr class="hover:bg-sic-soft/50">
+    <td class="py-3.5 px-5 font-extrabold text-sic">${esc(t.id)}<span class="block text-[10px] text-slate-400 font-normal">${esc(t.agency)}</span></td>
+    <td class="py-3.5 px-5"><b class="block">${esc(t.name)}</b><span class="text-[11px] text-slate-500">${t.type==='fisica'?'PF':'PJ'} · ${esc(t.doc)}</span></td>
+    <td class="py-3.5 px-5"><b>${t.time}</b><span class="block text-[10px] text-sic-dark font-bold">${fmtDate(t.date)} · ${t.duration}m</span></td>
+    <td class="py-3.5 px-5"><b class="block">${esc(t.problem)}</b><span class="text-[10px] text-slate-400">${esc(t.category)}</span></td>
+    <td class="py-3.5 px-5"><span class="px-2.5 py-1 border rounded-full text-[11px] font-bold ${badge(t.status)}">${t.status}</span></td>
+    <td class="py-3.5 px-5 text-right"><button onclick="openReport('${t.id}')" class="btn btn-o !py-1.5 !px-3 !text-xs"><i class="fa-solid fa-file-lines"></i> Relatório</button></td></tr>`).join('')
+  :'<tr><td colspan="6" class="py-10 text-center text-slate-400 font-semibold">Nenhum atendimento.</td></tr>';
+  stats();
+}
+$('staff-search').oninput=renderQueue;
+function openReport(id){
+  const t=queue.find(x=>x.id===id);if(!t)return;activeId=id;
+  $('m-title').textContent='Relatório · '+t.id;
+  const c=(l,v)=>`<div><dt class="text-slate-400 text-[10px] uppercase font-extrabold">${l}</dt><dd class="font-bold">${esc(v)}</dd></div>`;
+  $('m-grid').innerHTML=c('Associado',t.name)+c('CPF / CNPJ',t.doc)+c('Agência',t.agency)+c('Data',`${fmtDate(t.date)} às ${t.time}`)+c('Duração',t.duration+' min')+c('Perfil',t.type);
+  $('m-cat').textContent=`${t.category} → ${t.problem}`;$('m-desc').textContent=t.report;
+  const b=$('m-badge');b.textContent=t.status;b.className='px-3 py-1 border rounded-full text-xs font-bold '+badge(t.status);
+  $('report-modal').classList.remove('hidden');$('report-modal').classList.add('flex');
+}
+function setStatus(s){const t=queue.find(x=>x.id===activeId);if(!t)return;t.status=s;closeModal('report-modal');renderQueue();toast('Status alterado para: '+s)}
+function closeModal(id){$(id).classList.add('hidden');$(id).classList.remove('flex')}
+
+/* GERÊNCIA: Adicionar / Remover Colaboradores & Demandas */
+function renderManager(){
+  // Tabela equipe
+  $('manager-team-tbody').innerHTML=teamList.map((m,idx)=>`
+    <tr>
+      <td class="py-2.5 px-3 font-bold">${esc(m.name)}</td>
+      <td class="py-2.5 px-3"><span class="bg-slate-100 px-2 py-0.5 rounded font-bold">${m.profile}</span></td>
+      <td class="py-2.5 px-3">
+        <select onchange="updateStaffStatus(${idx},this.value)" class="inp !py-1 !text-xs font-bold">
+          <option value="Livre" ${m.status==='Livre'?'selected':''}>Livre</option>
+          <option value="Em Atendimento" ${m.status==='Em Atendimento'?'selected':''}>Em Atendimento</option>
+          <option value="Em Pausa" ${m.status==='Em Pausa'?'selected':''}>Em Pausa</option>
+        </select>
+      </td>
+      <td class="py-2.5 px-3 text-right">
+        <button onclick="removeStaff(${idx})" class="text-red-500 hover:text-red-700 p-1"><i class="fa-solid fa-trash"></i></button>
+      </td>
+    </tr>
+  `).join('');
+  $('team-count-badge').textContent=teamList.length+' ativos';
+
+  // Tabela demandas
+  let probHtml='';
+  Object.keys(problemData).forEach(cat=>{
+    problemData[cat].forEach(([prob,min],idx)=>{
+      probHtml+=`<tr>
+        <td class="py-2.5 px-3"><b>${esc(prob)}</b><span class="block text-[10px] text-slate-400">${esc(cat)}</span></td>
+        <td class="py-2.5 px-3 font-bold text-sic">${min} min</td>
+        <td class="py-2.5 px-3 text-right">
+          <button onclick="removeProblem('${cat}',${idx})" class="text-red-500 hover:text-red-700 p-1"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      </tr>`;
+    });
+  });
+  $('manager-probs-tbody').innerHTML=probHtml;
+}
+
+$('add-staff-form').onsubmit=e=>{
+  e.preventDefault();
+  const name=$('new-staff-name').value.trim();
+  const profile=$('new-staff-profile').value;
+  if(!name)return;
+  teamList.push({name,profile,status:'Livre'});
+  $('add-staff-form').reset();
+  renderManager();
+  toast('Colaborador adicionado com sucesso!');
+};
+
+function removeStaff(idx){
+  teamList.splice(idx,1);
+  renderManager();
+  toast('Colaborador removido.');
+}
+
+function updateStaffStatus(idx,status){
+  teamList[idx].status=status;
+  toast('Status atualizado!');
+}
+
+$('add-problem-form').onsubmit=e=>{
+  e.preventDefault();
+  const cat=$('new-prob-cat').value;
+  const name=$('new-prob-name').value.trim();
+  const time=parseInt($('new-prob-time').value)||15;
+  if(!name||!cat)return;
+  if(!problemData[cat])problemData[cat]=[];
+  problemData[cat].push([name,time]);
+  $('add-problem-form').reset();
+  initSelects();
+  renderManager();
+  toast('Nova demanda cadastrada!');
+};
+
+function removeProblem(cat,idx){
+  problemData[cat].splice(idx,1);
+  if(problemData[cat].length===0)delete problemData[cat];
+  initSelects();
+  renderManager();
+  toast('Demanda removida.');
+}
+
+/* Toast */
+let tt;function toast(m,ok=1){$('toast-m').textContent=m;$('toast-i').className='fa-solid '+(ok?'fa-circle-check text-sic-lime':'fa-circle-exclamation text-rose-400');const t=$('toast');t.classList.remove('-translate-y-24','opacity-0');clearTimeout(tt);tt=setTimeout(()=>t.classList.add('-translate-y-24','opacity-0'),3500)}
+
+initSelects();
+show(1);
+renderQueue();
+</script>
+</body>
+</html>
