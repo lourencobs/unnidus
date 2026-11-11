@@ -76,7 +76,7 @@ button:focus-visible,select:focus-visible{outline:3px solid var(--link);outline-
 
 <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8">
 
-<!-- CLIENTE / PORTAL (ESTILO HERO DO PRINT) -->
+<!-- CLIENTE / PORTAL -->
 <section id="view-client" class="fade space-y-8">
   <!-- Hero Banner Verde -->
   <div class="bg-sic pattern rounded-3xl p-8 sm:p-12 text-white shadow-xl relative overflow-hidden">
@@ -94,7 +94,7 @@ button:focus-visible,select:focus-visible{outline:3px solid var(--link);outline-
     </div>
   </div>
 
-  <!-- Cards de Serviços (Estilo Print 2) -->
+  <!-- Cards de Serviços -->
   <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:border-sic-line transition space-y-3">
       <div class="w-12 h-12 rounded-xl bg-sic-soft text-sic flex items-center justify-center text-xl"><i class="fa-solid fa-piggy-bank"></i></div>
@@ -188,7 +188,7 @@ button:focus-visible,select:focus-visible{outline:3px solid var(--link);outline-
   </div>
 </section>
 
-<!-- COLABORADOR -->
+<!-- COLABORADOR (COM SUPORTE DA SEDE) -->
 <section id="view-staff" class="hidden fade space-y-6">
   <div id="stats" class="grid grid-cols-2 lg:grid-cols-4 gap-4"></div>
   <div class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
@@ -200,74 +200,86 @@ button:focus-visible,select:focus-visible{outline:3px solid var(--link);outline-
       <thead><tr class="bg-slate-50 text-[11px] font-extrabold text-slate-500 uppercase tracking-wider"><th class="py-3 px-5">Senha</th><th class="py-3 px-5">Associado</th><th class="py-3 px-5">Horário</th><th class="py-3 px-5">Demanda</th><th class="py-3 px-5">Status</th><th class="py-3 px-5 text-right">Ação</th></tr></thead>
       <tbody id="queue-tbody" class="divide-y divide-slate-100"></tbody></table></div>
   </div>
+
+  <!-- Bloco Chamado à Sede na Área do Colaborador -->
+  <div class="bg-white rounded-3xl shadow-xl border border-slate-200 p-6">
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4 mb-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-sic-deep text-sic-lime flex items-center justify-center"><i class="fa-solid fa-building-columns"></i></div>
+        <div><h3 class="font-extrabold text-lg">Apoio da Sede / Central</h3><p class="text-xs text-slate-500">Chamados abertos para assistência em casos complexos.</p></div>
+      </div>
+      <button class="btn btn-p !py-2 !text-xs" onclick="openHqModal()"><i class="fa-solid fa-paper-plane"></i> Chamar Sede para Assistência</button>
+    </div>
+    <div class="overflow-x-auto"><table class="w-full text-left text-xs">
+      <thead><tr class="bg-slate-50 font-extrabold text-slate-500 uppercase"><th class="py-3 px-4">Código</th><th class="py-3 px-4">Tipo</th><th class="py-3 px-4">Horário</th><th class="py-3 px-4">Tempo</th><th class="py-3 px-4">Status</th></tr></thead>
+      <tbody id="hq-tbody" class="divide-y divide-slate-100"></tbody></table></div>
+  </div>
 </section>
 
-<!-- GERÊNCIA -->
+<!-- GERÊNCIA (COM CONFIGURAÇÃO DE HORÁRIO ABERTURA/FECHAMENTO) -->
 <section id="view-manager" class="hidden fade space-y-6">
   <div class="bg-sic pattern p-6 rounded-3xl text-white shadow-lg flex flex-wrap justify-between items-center gap-4">
-    <div><h2 class="text-2xl font-black"><i class="fa-solid fa-sliders mr-2"></i>Painel da Gerência</h2><p class="text-white text-sm mt-1">Gerencie equipe, colaboradores, status e demandas por agência.</p></div>
+    <div><h2 class="text-2xl font-black"><i class="fa-solid fa-sliders mr-2"></i>Painel da Gerência</h2><p class="text-white text-sm mt-1">Horário de funcionamento, equipe, status e demandas por agência.</p></div>
     <span class="bg-sic-deep/60 px-4 py-2 rounded-full text-xs font-bold"><i class="fa-solid fa-building-user text-sic-lime mr-1"></i>Agência Centro Histórico</span>
   </div>
 
-  <div class="grid lg:grid-cols-2 gap-6">
-    <!-- Bloco 1: Gestão de Equipe / Colaboradores -->
-    <div class="bg-white rounded-3xl shadow-xl border border-slate-200 p-6 space-y-4">
+  <div class="grid lg:grid-cols-3 gap-6">
+    <!-- Bloco 1: Configurar Horário e Funcionamento -->
+    <form id="cfg-form" class="bg-white rounded-3xl shadow-xl border border-slate-200 p-6 space-y-4 text-sm">
+      <h3 class="font-extrabold text-lg border-b border-slate-100 pb-3"><i class="fa-solid fa-clock mr-2 text-sic"></i>Horário de Funcionamento</h3>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="block font-semibold mb-1 text-xs">Abertura *</label><input type="time" id="cfg-open" value="09:00" class="inp !py-1.5 !text-xs"></div>
+        <div><label class="block font-semibold mb-1 text-xs">Fechamento *</label><input type="time" id="cfg-close" value="16:00" class="inp !py-1.5 !text-xs"></div>
+      </div>
+      <div><div class="flex justify-between mb-1"><span class="font-semibold text-xs">Guichês PF</span><b id="pf-l" class="text-sic">4</b></div><input type="range" id="cfg-pf" min="1" max="10" value="4" class="w-full accent-sic"></div>
+      <div><div class="flex justify-between mb-1"><span class="font-semibold text-xs">Guichês PJ</span><b id="pj-l" class="text-sic">2</b></div><input type="range" id="cfg-pj" min="1" max="10" value="2" class="w-full accent-sic"></div>
+      <button type="submit" class="btn btn-p w-full justify-center !py-2 !text-xs"><i class="fa-solid fa-floppy-disk"></i> Salvar Horários</button>
+    </form>
+
+    <!-- Bloco 2: Gestão de Equipe -->
+    <div class="bg-white rounded-3xl shadow-xl border border-slate-200 p-6 space-y-4 lg:col-span-2">
       <div class="flex justify-between items-center border-b border-slate-100 pb-3">
         <h3 class="font-extrabold text-lg"><i class="fa-solid fa-users-gear mr-2 text-sic"></i>Equipe & Colaboradores</h3>
         <span id="team-count-badge" class="text-xs font-bold bg-sic-soft text-sic-dark px-3 py-1 rounded-full">0 ativos</span>
       </div>
-
-      <!-- Formulário Adicionar Colaborador -->
-      <form id="add-staff-form" class="bg-sic-soft/60 p-4 rounded-2xl border border-sic-line space-y-3">
-        <h4 class="text-xs font-black uppercase tracking-wider text-sic-dark">Adicionar Novo Colaborador</h4>
-        <div class="grid sm:grid-cols-2 gap-3">
-          <div><label class="block text-xs font-semibold mb-1">Nome *</label><input id="new-staff-name" required class="inp !py-1.5 !text-xs" placeholder="Ex: Ana Souza"></div>
-          <div><label class="block text-xs font-semibold mb-1">Perfil *</label><select id="new-staff-profile" class="inp !py-1.5 !text-xs"><option value="PF">Pessoa Física (PF)</option><option value="PJ">Pessoa Jurídica (PJ)</option></select></div>
-        </div>
-        <button type="submit" class="btn btn-p !py-2 !text-xs w-full justify-center"><i class="fa-solid fa-user-plus"></i> Cadastrar Colaborador</button>
+      <form id="add-staff-form" class="bg-sic-soft/60 p-3 rounded-2xl border border-sic-line flex flex-wrap sm:flex-nowrap gap-2 items-end">
+        <div class="flex-1"><label class="block text-[11px] font-semibold mb-1">Nome</label><input id="new-staff-name" required class="inp !py-1 !text-xs" placeholder="Ex: Ana Souza"></div>
+        <div class="w-32"><label class="block text-[11px] font-semibold mb-1">Perfil</label><select id="new-staff-profile" class="inp !py-1 !text-xs"><option value="PF">PF</option><option value="PJ">PJ</option></select></div>
+        <button type="submit" class="btn btn-p !py-1.5 !text-xs"><i class="fa-solid fa-user-plus"></i> Adicionar</button>
       </form>
-
-      <!-- Tabela de Equipe -->
-      <div class="overflow-x-auto max-h-72 overflow-y-auto">
+      <div class="overflow-x-auto max-h-48 overflow-y-auto">
         <table class="w-full text-left text-xs">
-          <thead><tr class="bg-slate-50 font-extrabold text-slate-500 uppercase"><th class="py-2.5 px-3">Nome</th><th class="py-2.5 px-3">Perfil</th><th class="py-2.5 px-3">Status</th><th class="py-2.5 px-3 text-right">Ações</th></tr></thead>
+          <thead><tr class="bg-slate-50 font-extrabold text-slate-500 uppercase"><th class="py-2 px-3">Nome</th><th class="py-2 px-3">Perfil</th><th class="py-2 px-3">Status</th><th class="py-2 px-3 text-right">Ação</th></tr></thead>
           <tbody id="manager-team-tbody" class="divide-y divide-slate-100"></tbody>
         </table>
       </div>
     </div>
+  </div>
 
-    <!-- Bloco 2: Gestão de Demandas / Problemas e Tempos -->
-    <div class="bg-white rounded-3xl shadow-xl border border-slate-200 p-6 space-y-4">
-      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-        <h3 class="font-extrabold text-lg"><i class="fa-solid fa-clock-rotate-left mr-2 text-sic"></i>Demandas & Tempos</h3>
-        <span class="text-xs font-bold bg-sic-soft text-sic-dark px-3 py-1 rounded-full">Configurar Tempos</span>
-      </div>
-
-      <!-- Formulário Adicionar Demanda -->
-      <form id="add-problem-form" class="bg-sic-soft/60 p-4 rounded-2xl border border-sic-line space-y-3">
-        <h4 class="text-xs font-black uppercase tracking-wider text-sic-dark">Adicionar Nova Demanda</h4>
-        <div class="grid sm:grid-cols-2 gap-3">
-          <div><label class="block text-xs font-semibold mb-1">Categoria *</label><select id="new-prob-cat" class="inp !py-1.5 !text-xs"></select></div>
-          <div><label class="block text-xs font-semibold mb-1">Nome do Serviço *</label><input id="new-prob-name" required class="inp !py-1.5 !text-xs" placeholder="Ex: Análise Especial"></div>
-        </div>
-        <div><label class="block text-xs font-semibold mb-1">Tempo Estimado (minutos) *</label><input type="number" id="new-prob-time" min="5" max="120" value="20" required class="inp !py-1.5 !text-xs"></div>
-        <button type="submit" class="btn btn-p !py-2 !text-xs w-full justify-center"><i class="fa-solid fa-plus-circle"></i> Adicionar Serviço</button>
-      </form>
-
-      <!-- Lista de Demandas -->
-      <div class="overflow-x-auto max-h-72 overflow-y-auto">
-        <table class="w-full text-left text-xs">
-          <thead><tr class="bg-slate-50 font-extrabold text-slate-500 uppercase"><th class="py-2.5 px-3">Categoria / Serviço</th><th class="py-2.5 px-3">Tempo</th><th class="py-2.5 px-3 text-right">Ações</th></tr></thead>
-          <tbody id="manager-probs-tbody" class="divide-y divide-slate-100"></tbody>
-        </table>
-      </div>
+  <!-- Bloco 3: Gestão de Demandas -->
+  <div class="bg-white rounded-3xl shadow-xl border border-slate-200 p-6 space-y-4">
+    <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+      <h3 class="font-extrabold text-lg"><i class="fa-solid fa-clock-rotate-left mr-2 text-sic"></i>Demandas & Tempos de Atendimento</h3>
+      <span class="text-xs font-bold bg-sic-soft text-sic-dark px-3 py-1 rounded-full">Personalizar Agência</span>
+    </div>
+    <form id="add-problem-form" class="bg-sic-soft/60 p-4 rounded-2xl border border-sic-line grid sm:grid-cols-4 gap-3 items-end">
+      <div><label class="block text-[11px] font-semibold mb-1">Categoria</label><select id="new-prob-cat" class="inp !py-1.5 !text-xs"></select></div>
+      <div><label class="block text-[11px] font-semibold mb-1">Serviço</label><input id="new-prob-name" required class="inp !py-1.5 !text-xs" placeholder="Ex: Análise Especial"></div>
+      <div><label class="block text-[11px] font-semibold mb-1">Tempo (min)</label><input type="number" id="new-prob-time" min="5" max="120" value="20" required class="inp !py-1.5 !text-xs"></div>
+      <button type="submit" class="btn btn-p !py-2 !text-xs justify-center"><i class="fa-solid fa-plus-circle"></i> Adicionar Serviço</button>
+    </form>
+    <div class="overflow-x-auto max-h-56 overflow-y-auto">
+      <table class="w-full text-left text-xs">
+        <thead><tr class="bg-slate-50 font-extrabold text-slate-500 uppercase"><th class="py-2.5 px-3">Categoria / Serviço</th><th class="py-2.5 px-3">Tempo Estimado</th><th class="py-2.5 px-3 text-right">Ações</th></tr></thead>
+        <tbody id="manager-probs-tbody" class="divide-y divide-slate-100"></tbody>
+      </table>
     </div>
   </div>
 </section>
 
 </main>
 
-<!-- WIDGETS FLUTUANTES (ESTILO DO PRINT 1 E 2) -->
+<!-- WIDGETS FLUTUANTES -->
 <div class="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
   <button aria-label="WhatsApp" onclick="toast('Abrindo atendimento via WhatsApp...')" class="w-14 h-14 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-2xl flex items-center justify-center text-3xl transition transform hover:scale-105">
     <i class="fa-brands fa-whatsapp"></i>
@@ -297,6 +309,23 @@ button:focus-visible,select:focus-visible{outline:3px solid var(--link);outline-
   </div>
 </div>
 
+<!-- MODAL CHAMAR SEDE -->
+<div id="hq-modal" class="fixed inset-0 bg-sic-deep/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden fade">
+    <div class="bg-sic-deep text-white px-6 py-4 flex justify-between items-center"><h3 class="font-extrabold"><i class="fa-solid fa-building-columns mr-2 text-sic-lime"></i>Solicitar Suporte da Sede</h3><button onclick="closeModal('hq-modal')" class="text-xl p-2 -m-2"><i class="fa-solid fa-xmark"></i></button></div>
+    <form id="hq-form" class="p-6 space-y-4 text-sm">
+      <div><label class="block font-semibold mb-1 text-xs">Tipo de Problema / Alçada *</label><select id="hq-type" class="inp !py-1.5 !text-xs">
+        <option>Bloqueio de Segurança / Anti-Fraude</option><option>Aprovação Especial de Crédito / Alçada</option><option>Análise de Contrato PJ Complexo</option><option>Erro em Operação de Câmbio</option><option>Suporte Técnico a Sistemas</option></select></div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="block font-semibold mb-1 text-xs">Horário *</label><input type="time" id="hq-time" required class="inp !py-1.5 !text-xs"></div>
+        <div><label class="block font-semibold mb-1 text-xs">Tempo Gasto *</label><input id="hq-dur" required placeholder="Ex: 20 min" class="inp !py-1.5 !text-xs"></div>
+      </div>
+      <div><label class="block font-semibold mb-1 text-xs">Observações *</label><textarea id="hq-notes" rows="3" required class="inp !text-xs" placeholder="Motivo do encaminhamento..."></textarea></div>
+      <div class="flex justify-end gap-2"><button type="button" class="btn btn-o !py-2 !text-xs" onclick="closeModal('hq-modal')">Cancelar</button><button type="submit" class="btn btn-p !py-2 !text-xs"><i class="fa-solid fa-paper-plane"></i> Enviar Chamado</button></div>
+    </form>
+  </div>
+</div>
+
 <div id="toast" class="fixed bottom-5 left-5 bg-sic-deep text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-3 transition-all duration-300 -translate-y-24 opacity-0 z-50"><i id="toast-i"></i><span id="toast-m" class="text-sm font-semibold"></span></div>
 
 <script>
@@ -305,7 +334,7 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const fmtDate=d=>d.split('-').reverse().join('/');
 const todayISO=()=>{const d=new Date();return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
 
-const agencyData={"Porto Alegre":["Agência Centro Histórico - Av. Borges","Agência Moinhos de Vento"],"Nova Trento":["Agência Nova Trento Centro - Av. Santo Inácio"],"Caxias do Sul":["Agência Caxias Centro"],"Florianópolis":["Agência Centro - Florianópolis"]};
+const agencyData={"Porto Alegre":["Agência Centro Histórico - Av. Borges","Agência Moinhos de Vento"],"Nova Trento":["Agência Nova Trento Centro - Av. Santo Inácio"],"Caxias do Sul":["Agência Caxias Centro"]};
 
 let problemData={
 "Contas e Abertura":[["Abertura de Conta e Contratação Inicial",45],["Atualização Cadastral",30]],
@@ -320,6 +349,10 @@ let teamList=[
 {name:'Fernando Alves',profile:'PF',status:'Em Pausa'}
 ];
 
+let hqList=[
+{id:'HQ-101',type:'Aprovação Especial de Crédito',time:'09:30',dur:'30 min',status:'Em Análise'}
+];
+
 const cfg={open:'09:00',close:'16:00',pf:4,pj:2};
 let profile='fisica',duration=15,selTime='',activeId=null,step=1;
 
@@ -328,14 +361,14 @@ let queue=[
 {id:'#SIC-4090',type:'fisica',name:'Sandra Maria',doc:'321.654.987-10',agency:'Agência Centro Histórico - Av. Borges',category:'Canais Digitais',problem:'Liberação de Dispositivo / App',duration:15,report:'Troquei de celular e preciso liberar o app.',date:todayISO(),time:'11:00',status:'Aguardando'}
 ];
 
-/* Sistema de Abas Superiores */
+/* Sistema de Abas */
 function switchSysTab(t){
   ['client','staff','manager'].forEach(v=>$('view-'+v).classList.toggle('hidden',v!==t));
   document.querySelectorAll('.sys-tab').forEach(b=>{
     const on=b.dataset.tab===t;
     b.className='sys-tab px-3 py-1.5 rounded-full transition '+(on?'bg-white text-sic-deep shadow font-bold':'text-white/90 hover:text-white font-bold');
   });
-  if(t==='staff')renderQueue();
+  if(t==='staff'){renderQueue();renderHq();}
   if(t==='manager')renderManager();
 }
 document.querySelectorAll('.sys-tab').forEach(b=>b.onclick=()=>switchSysTab(b.dataset.tab));
@@ -373,7 +406,7 @@ function renderProfile(){
 }
 renderProfile();
 
-/* Horários */
+/* Horários com aviso para selecionar outro dia */
 const toMin=t=>{const[h,m]=t.split(':').map(Number);return h*60+m};
 const toHM=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
 function renderSlots(){
@@ -381,15 +414,22 @@ function renderSlots(){
   const date=$('ticket-date').value;if(!date)return;
   const agency=$('input-agency').value,cap=profile==='fisica'?cfg.pf:cfg.pj;
   const step=Math.max(15,Math.ceil(duration/15)*15),open=toMin(cfg.open),close=toMin(cfg.close);
+  const now=new Date(),nowMin=now.getHours()*60+now.getMinutes(),isToday=date===todayISO();
   let n=0;
   for(let t=open;t+duration<=close;t+=step){
     if(t>=720&&t<780)continue;
     const taken=queue.filter(q=>q.date===date&&q.agency===agency&&q.type===profile&&q.status!=='Concluído'&&toMin(q.time)<t+step&&toMin(q.time)+q.duration>t).length;
-    const b=document.createElement('button');b.type='button';b.className='slot';b.disabled=taken>=cap;b.textContent=toHM(t);
+    const off=taken>=cap||(isToday&&t<=nowMin);
+    const b=document.createElement('button');b.type='button';b.className='slot';b.disabled=off;b.textContent=toHM(t);
     b.onclick=()=>{box.querySelectorAll('.slot').forEach(x=>x.classList.remove('on'));b.classList.add('on');selTime=toHM(t)};
     box.appendChild(b);n++;
   }
-  if(!n)box.innerHTML='<p class="col-span-full text-sm text-slate-500">Sem horários disponíveis.</p>';
+  if(n===0 || box.querySelectorAll('.slot:not(:disabled)').length===0){
+    box.innerHTML=`<div class="col-span-full bg-amber-50 border border-amber-200 p-4 rounded-2xl text-amber-900 text-xs text-center space-y-2">
+      <p class="font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Não há horários disponíveis para esta data.</p>
+      <p>Por favor, selecione outro dia no calendário acima para encontrar horários vagos.</p>
+    </div>`;
+  }
 }
 $('ticket-date').onchange=renderSlots;
 
@@ -434,7 +474,7 @@ function stats(){
     <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 flex items-center justify-between"><div><p class="text-[11px] font-extrabold text-slate-400 uppercase">Fila hoje</p><h4 class="text-3xl font-black mt-0.5">${queue.length}</h4></div><div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl text-sic bg-sic-soft"><i class="fa-solid fa-users"></i></div></div>
     <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 flex items-center justify-between"><div><p class="text-[11px] font-extrabold text-slate-400 uppercase">Em atendimento</p><h4 class="text-3xl font-black mt-0.5">${c('Em Atendimento')}</h4></div><div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl text-amber-600 bg-amber-50"><i class="fa-solid fa-spinner fa-spin"></i></div></div>
     <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 flex items-center justify-between"><div><p class="text-[11px] font-extrabold text-slate-400 uppercase">Concluídos</p><h4 class="text-3xl font-black mt-0.5">${c('Concluído')}</h4></div><div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl text-sic bg-sic-soft"><i class="fa-solid fa-circle-check"></i></div></div>
-    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 flex items-center justify-between"><div><p class="text-[11px] font-extrabold text-slate-400 uppercase">Equipe Ativa</p><h4 class="text-3xl font-black mt-0.5">${teamList.length}</h4></div><div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl text-blue-600 bg-blue-50"><i class="fa-solid fa-user-tie"></i></div></div>
+    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 flex items-center justify-between"><div><p class="text-[11px] font-extrabold text-slate-400 uppercase">Chamados Sede</p><h4 class="text-3xl font-black mt-0.5">${hqList.length}</h4></div><div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl text-sic-deep bg-sic-lime/40"><i class="fa-solid fa-headset"></i></div></div>
   `;
   $('queue-badge').textContent=c('Aguardando');
 }
@@ -452,6 +492,41 @@ function renderQueue(){
   stats();
 }
 $('staff-search').oninput=renderQueue;
+
+function renderHq(){
+  $('hq-tbody').innerHTML=hqList.map(l=>`
+    <tr class="hover:bg-slate-50">
+      <td class="py-3 px-4 font-extrabold text-sic-dark">${esc(l.id)}</td>
+      <td class="py-3 px-4 font-semibold">${esc(l.type)}</td>
+      <td class="py-3 px-4">${esc(l.time)}</td>
+      <td class="py-3 px-4 font-bold">${esc(l.dur)}</td>
+      <td class="py-3 px-4"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">${esc(l.status)}</span></td>
+    </tr>
+  `).join('');
+}
+
+function openHqModal(){
+  const n=new Date();
+  $('hq-time').value=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  $('hq-modal').classList.remove('hidden');$('hq-modal').classList.add('flex');
+}
+
+$('hq-form').onsubmit=e=>{
+  e.preventDefault();
+  hqList.unshift({
+    id:'HQ-'+(100+Math.floor(Math.random()*900)),
+    type:$('hq-type').value,
+    time:$('hq-time').value,
+    dur:$('hq-dur').value.trim(),
+    status:'Em Análise'
+  });
+  renderHq();
+  stats();
+  closeModal('hq-modal');
+  $('hq-form').reset();
+  toast('Chamado enviado à Sede com sucesso!');
+};
+
 function openReport(id){
   const t=queue.find(x=>x.id===id);if(!t)return;activeId=id;
   $('m-title').textContent='Relatório · '+t.id;
@@ -464,9 +539,15 @@ function openReport(id){
 function setStatus(s){const t=queue.find(x=>x.id===activeId);if(!t)return;t.status=s;closeModal('report-modal');renderQueue();toast('Status alterado para: '+s)}
 function closeModal(id){$(id).classList.add('hidden');$(id).classList.remove('flex')}
 
-/* GERÊNCIA: Adicionar / Remover Colaboradores & Demandas */
+/* GERÊNCIA: Configurar horários, equipe e demandas */
 function renderManager(){
-  // Tabela equipe
+  $('cfg-open').value=cfg.open;
+  $('cfg-close').value=cfg.close;
+  $('cfg-pf').value=cfg.pf;
+  $('pf-l').textContent=cfg.pf;
+  $('cfg-pj').value=cfg.pj;
+  $('pj-l').textContent=cfg.pj;
+
   $('manager-team-tbody').innerHTML=teamList.map((m,idx)=>`
     <tr>
       <td class="py-2.5 px-3 font-bold">${esc(m.name)}</td>
@@ -485,7 +566,6 @@ function renderManager(){
   `).join('');
   $('team-count-badge').textContent=teamList.length+' ativos';
 
-  // Tabela demandas
   let probHtml='';
   Object.keys(problemData).forEach(cat=>{
     problemData[cat].forEach(([prob,min],idx)=>{
@@ -501,6 +581,18 @@ function renderManager(){
   $('manager-probs-tbody').innerHTML=probHtml;
 }
 
+$('cfg-form').onsubmit=e=>{
+  e.preventDefault();
+  cfg.open=$('cfg-open').value;
+  cfg.close=$('cfg-close').value;
+  cfg.pf=+$('cfg-pf').value;
+  cfg.pj=+$('cfg-pj').value;
+  toast('Horários e parâmetros salvos com sucesso!');
+};
+
+$('cfg-pf').oninput=e=>$('pf-l').textContent=e.target.value;
+$('cfg-pj').oninput=e=>$('pj-l').textContent=e.target.value;
+
 $('add-staff-form').onsubmit=e=>{
   e.preventDefault();
   const name=$('new-staff-name').value.trim();
@@ -509,7 +601,7 @@ $('add-staff-form').onsubmit=e=>{
   teamList.push({name,profile,status:'Livre'});
   $('add-staff-form').reset();
   renderManager();
-  toast('Colaborador adicionado com sucesso!');
+  toast('Colaborador adicionado!');
 };
 
 function removeStaff(idx){
@@ -534,7 +626,7 @@ $('add-problem-form').onsubmit=e=>{
   $('add-problem-form').reset();
   initSelects();
   renderManager();
-  toast('Nova demanda cadastrada!');
+  toast('Demanda adicionada!');
 };
 
 function removeProblem(cat,idx){
@@ -551,6 +643,7 @@ let tt;function toast(m,ok=1){$('toast-m').textContent=m;$('toast-i').className=
 initSelects();
 show(1);
 renderQueue();
+renderHq();
 </script>
 </body>
 </html>
